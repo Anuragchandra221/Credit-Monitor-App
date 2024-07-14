@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "893745029601",
+    "project_id": "devoos-credit-monitor",
+    "storage_bucket": "devoos-credit-monitor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893745029601:android:d897b220e3e680476ef2a0",
+        "android_client_info": {
+          "package_name": "com.example.credit_monitor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHnxTfDw-BWfnIs3J95CJE6lzTqxflGEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
