@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:credit_monitor/pages/add_person.dart';
 import 'package:credit_monitor/services/firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Firestore fireStoreService = Firestore();
   final TextEditingController _textcontroller = TextEditingController();
-  void openNoteBox() {
+  void openNoteBox({String? docID}) {
     showDialog(
       context: context,
       builder: (context) {
@@ -23,7 +24,11 @@ class _HomePageState extends State<HomePage> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                fireStoreService.addCredit({"name": _textcontroller.text});
+                if(docID==null){
+                  // fireStoreService.addCredit({"name": _textcontroller.text});
+                }else{
+                  fireStoreService.updateCredit(docID, {"name": _textcontroller.text});
+                }
 
                 _textcontroller.clear();
                 Navigator.pop(context);
@@ -43,30 +48,50 @@ class _HomePageState extends State<HomePage> {
         title: Text("Notes"),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: openNoteBox,
+        onPressed: (){
+          Navigator.of(context).push(MaterialPageRoute(builder: (ctx)=>AddPerson()));
+        },
         child: Icon(Icons.add),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: fireStoreService.getCreditStream(),
+        stream: fireStoreService.getPersonStream(),
         builder: (context, snapshot) {
-
-          if(snapshot.hasData){
+          if (snapshot.hasData) {
             List creditList = snapshot.data!.docs;
 
-            return ListView.builder(itemCount: creditList.length, itemBuilder: (contenxt, index){
+            return ListView.builder(
               
-              DocumentSnapshot document = creditList[index];
-              String docID = document.id;
+              itemCount: creditList.length,
+              itemBuilder: (contenxt, index) {
+                DocumentSnapshot document = creditList[index];
+                String docID = document.id;
 
-              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-              String creditText = data['name'];
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+                String creditText = data['name'];
 
-              return ListTile(
-                title: Text(creditText),
-              );
-
-            },);
-          }else{
+                return ListTile(
+                  
+                  // titleAlignment: ListTileTitleAlignment.center,
+                  title: Text(creditText),
+                
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                      icon: const Icon(Icons.settings),
+                      onPressed: ()=>openNoteBox(docID: docID),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: ()=>fireStoreService.deleteCredit(docID),
+                    ),
+                    ]
+                  ),
+                );
+              },
+            );
+          } else {
             return Text("No credit");
           }
         },

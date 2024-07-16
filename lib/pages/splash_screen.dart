@@ -1,0 +1,32 @@
+import 'package:credit_monitor/pages/home_page.dart';
+import 'package:flutter/material.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    gotoHome();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text("Devoos"),
+      ),
+    );
+  }
+
+  Future<void> gotoHome() async {
+    await Future.delayed(Duration(seconds: 3));
+    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => HomePage()));
+  }
+}

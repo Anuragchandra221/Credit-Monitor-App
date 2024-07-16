@@ -1,4 +1,5 @@
 import 'package:credit_monitor/pages/home_page.dart';
+import 'package:credit_monitor/pages/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.black
       ),
-      home: const HomePage(),
+      home: const SplashScreen(),
     );
   }
 }
