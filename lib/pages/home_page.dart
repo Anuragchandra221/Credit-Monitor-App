@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:credit_monitor/pages/add_person.dart';
+import 'package:credit_monitor/pages/person_page.dart';
 import 'package:credit_monitor/services/firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -71,7 +72,9 @@ class _HomePageState extends State<HomePage> {
                 String creditText = data['name'];
 
                 return ListTile(
-                  
+                  onTap: ()=>{
+                    Navigator.of(contenxt).push(MaterialPageRoute(builder: (ctx)=>PersonPage(docID: docID, data: data,)))
+                  },
                   // titleAlignment: ListTileTitleAlignment.center,
                   title: Text(creditText),
                 
@@ -80,11 +83,11 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       IconButton(
                       icon: const Icon(Icons.settings),
-                      onPressed: ()=>openNoteBox(docID: docID),
+                      onPressed: ()=>{},
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: ()=>fireStoreService.deleteCredit(docID),
+                      onPressed: ()=>{},
                     ),
                     ]
                   ),
