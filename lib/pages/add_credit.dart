@@ -76,14 +76,15 @@ class AddCredit extends StatelessWidget {
       ));
     }else{
       final obj;
+      final _amount = double.tryParse(_amountController.text) ;
       if(_itemsController.text.isEmpty){
         obj = {
-          "amount": _amountController.text
+          "amount": _amount
         };
       }else{
         obj = {
           "items": _itemsController.text,
-          "amount": _amountController.text
+          "amount": _amount
         };
       }
       fireStoreService.addCredit(docID, obj);

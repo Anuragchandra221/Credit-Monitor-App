@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             List creditList = snapshot.data!.docs;
+            
 
             return ListView.builder(
               
@@ -71,6 +72,7 @@ class _HomePageState extends State<HomePage> {
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
                 String creditText = data['name'];
+                double amount = data['total_credit'];
 
                 return ListTile(
                   onTap: ()=>{
@@ -78,20 +80,8 @@ class _HomePageState extends State<HomePage> {
                   },
                   // titleAlignment: ListTileTitleAlignment.center,
                   title: Text(creditText),
-                
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                      icon: const Icon(Icons.settings),
-                      onPressed: ()=>{},
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: ()=>{},
-                    ),
-                    ]
-                  ),
+                  subtitle: Text(amount.toString()),
+            
                 );
               },
             );
