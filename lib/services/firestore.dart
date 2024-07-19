@@ -8,30 +8,57 @@ class Firestore{
   final CollectionReference data = FirebaseFirestore.instance.collection("Person");
   final CollectionReference credit = FirebaseFirestore.instance.collection("credit");
 
-  Future<void> addNewPerson(Map person){
+  Future<Map> addNewPerson(Map person) async{
+    final same_phone = await FirebaseFirestore.instance.collection("Person").where("phone", isEqualTo: person["phone"]).get();
+    if(same_phone.docs.isNotEmpty){
+      return {
+        "error": "Phone no already exists"
+      };
+    }
     if(person.containsKey("address")){
-      return data.add({
+      data.add({
         "name": person["name"],
         "phone": person["phone"],
         "addres": person["address"],
-        "total_credit": 0,
+        "total_credit": 0.0,
         "credit": [],
         "timestamp": Timestamp.now()
       });
     }else{
-      return data.add({
+      data.add({
         "name": person["name"],
         "phone": person["phone"],
-        "total_credit": 0,
+        "total_credit": 0.0,
         "credit": [],
         "timestamp": Timestamp.now()
       });
     }
+    return {
+      "msg": "success"
+    };
   }
 
   //create
   Future<void> addCredit(String docID, Map obj) async{
-    DocumentReference creditRef = await credit.add(obj);
+    // Map object = {
+    //   "amount": obj["amount"],
+    //   "items": obj["items"],
+    //   "timestamp": Timestamp.now()
+    // };
+    DocumentReference creditRef;
+    print("obj $obj");
+    if(obj.containsKey("items")){
+      creditRef = await credit.add({
+        "amount": obj["amount"],
+        "items": obj["items"],
+        "timestamp": Timestamp.now()
+      });
+    }else{
+      creditRef = await credit.add({
+      "amount": obj["amount"],
+      "timestamp": Timestamp.now()
+    });
+    }
     String creditID = creditRef.id;
 
     DocumentReference personRef = data.doc(docID);
@@ -81,22 +108,51 @@ class Firestore{
   }
 
   Stream<QuerySnapshot> getUserCreditsStream(List<String> creditIDs){
-    return FirebaseFirestore.instance.collection("credit").where(FieldPath.documentId, whereIn: creditIDs).snapshots();
+    return FirebaseFirestore.instance.collection("credit").orderBy("timestamp", descending: true).where(FieldPath.documentId, whereIn: creditIDs).snapshots();
   }
 
   
 
   //update
-  Future<void> updateCredit(String docID, Map note){
-    return data.doc(docID).update({
-      "name": note['name'],
-      'timestamp': Timestamp.now()
+  Future<void> updateCredit(String person_docID, String credit_id, Map credit_data) async{
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async{
+      DocumentSnapshot personSnapShot = await FirebaseFirestore.instance.collection("Person").doc(person_docID).get();
+      var amount = personSnapShot["total_credit"];
+      DocumentSnapshot creditSnapshot = await FirebaseFirestore.instance.collection("credit").doc(credit_id).get();
+      var credit = creditSnapshot['amount'];
+      amount = amount - credit + credit_data['amount'];
+      transaction.update(data.doc(person_docID), {
+        "total_credit": amount
+      });
+      transaction.update(FirebaseFirestore.instance.collection("credit").doc(credit_id), {
+        "amount": credit_data["amount"],
+        "items": credit_data["items"],
+        "timestamp": Timestamp.now()
+      });
     });
+
   }
 
+  
+
   //delete
-  Future<void> deleteCredit(String docID){
-    return data.doc(docID).delete();
+  Future<void> deleteCredit(String person_docID, String credit_id) async {
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async{
+      DocumentSnapshot personSnapShot = await FirebaseFirestore.instance.collection("Person").doc(person_docID).get();
+      var amount = personSnapShot["total_credit"];
+      DocumentSnapshot creditSnapshot = await FirebaseFirestore.instance.collection("credit").doc(credit_id).get();
+      var credit = creditSnapshot["amount"];
+      List creditIds = personSnapShot["credit"];
+
+      amount = amount - credit;
+      transaction.update(data.doc(person_docID), {
+        "total_credit": amount,
+        "credit": FieldValue.arrayRemove([credit_id])
+      });
+      transaction.delete(FirebaseFirestore.instance.collection("credit").doc(credit_id));
+    });
   }
 
 

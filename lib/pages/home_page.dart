@@ -14,33 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Firestore fireStoreService = Firestore();
   final TextEditingController _textcontroller = TextEditingController();
-  void openNoteBox({String? docID}) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: TextField(
-            controller: _textcontroller,
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                if(docID==null){
-                  // fireStoreService.addCredit({"name": _textcontroller.text});
-                }else{
-                  fireStoreService.updateCredit(docID, {"name": _textcontroller.text});
-                }
-
-                _textcontroller.clear();
-                Navigator.pop(context);
-              },
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +46,7 @@ class _HomePageState extends State<HomePage> {
                 Map<String, dynamic> data =
                     document.data() as Map<String, dynamic>;
                 String creditText = data['name'];
-                double amount = data['total_credit'];
+                var amount = data['total_credit'];
 
                 return ListTile(
                   onTap: ()=>{

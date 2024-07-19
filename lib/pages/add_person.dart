@@ -75,7 +75,7 @@ class AddPerson extends StatelessWidget {
     );
   }
 
-  void addPerson(BuildContext ctx) {
+  Future<void> addPerson(BuildContext ctx) async {
     final _name = _nameController;
     final _phone = _phoneController;
     final _address = _addressController;
@@ -114,8 +114,17 @@ class AddPerson extends StatelessWidget {
           "address": _address.text,
         };
       }
-      firestoreService.addNewPerson(data);
-      Navigator.of(ctx).pop();
+      final Map result = await firestoreService.addNewPerson(data);
+      if(result.containsKey("error")){
+        ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.red,
+        margin: EdgeInsets.all(10),
+        content: Text("Phone number already exists"),
+      ));
+      }else{
+        Navigator.of(ctx).pop();
+      }
     }
   }
 }

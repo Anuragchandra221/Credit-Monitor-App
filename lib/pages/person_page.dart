@@ -15,6 +15,66 @@ class PersonPage extends StatefulWidget {
 
 class _PersonPageState extends State<PersonPage> {
   final Firestore firestoreService = Firestore();
+  
+
+  void openNoteBox(String person_id, String credit_id, double amount, String items) {
+    final _amountcontroller = TextEditingController(text: amount.toString());
+  final _itemcontroller = TextEditingController(text: items);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: IntrinsicHeight(
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _itemcontroller,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: "Items",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20,),
+                TextFormField(
+                  controller: _amountcontroller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "Amount",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                if(person_id==null){
+                  // fireStoreService.addCredit({"name": _textcontroller.text});
+                }else{
+                  // firestoreService.updateCredit(docID, {"name": _textcontroller.text});
+                }
+
+                print("text  ${_amountcontroller.text} ${_itemcontroller.text}");
+                final _amount = double.tryParse(_amountcontroller.text);
+                Map credit_data = {
+                  "amount": _amount,
+                  "items": _itemcontroller.text
+                };
+                firestoreService.updateCredit(person_id, credit_id, credit_data);
+
+                _amountcontroller.clear();
+                _itemcontroller.clear();
+                Navigator.pop(context);
+              },
+              child: Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,17 +167,22 @@ class _PersonPageState extends State<PersonPage> {
                                   as Map<String, dynamic>;
                               return ListTile(
                                 title: Text(creditData["amount"].toString()),
-                                subtitle: Text(creditData["items"]),
+                                subtitle: creditData.containsKey("items")?Text(creditData["items"]):Text(''),
                                 trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.edit),
-                                        onPressed: () => {},
+                                        onPressed: () => {
+                                          openNoteBox(widget.docID, creditDocs[index].id, creditData["amount"], creditData["items"])
+                                        },
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.delete),
-                                        onPressed: () => {},
+                                        onPressed: (){
+                                          print("creditData ${creditDocs[index].id}");
+                                          firestoreService.deleteCredit(widget.docID, creditDocs[index].id);
+                                        },
                                       ),
                                     ]),
                               );

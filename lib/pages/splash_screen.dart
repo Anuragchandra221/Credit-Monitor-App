@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("Devoos"),
+        child: Image.asset("assets/devoos_icon.png", width: 200, height: 200,),
       ),
     );
   }
