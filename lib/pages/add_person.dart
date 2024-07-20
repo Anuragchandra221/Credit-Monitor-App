@@ -22,9 +22,11 @@ class AddPerson extends StatelessWidget {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "Name",
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
                 ),
               ),
               const SizedBox(
@@ -33,9 +35,11 @@ class AddPerson extends StatelessWidget {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "Phone Number",
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
                 ),
               ),
               const SizedBox(
@@ -44,9 +48,12 @@ class AddPerson extends StatelessWidget {
               TextFormField(
                 maxLines: 4,
                 controller: _addressController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: "Address",
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+
                 ),
               ),
               const SizedBox(
@@ -56,11 +63,17 @@ class AddPerson extends StatelessWidget {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: const ButtonStyle(
+                  
+                  style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)
+                      )
+                    ),
                     backgroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.green),
+                        const WidgetStatePropertyAll<Color>(Color.fromARGB(255, 221, 165, 203)),
                     foregroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.white),
+                        const WidgetStatePropertyAll<Color>(Colors.white),
                   ),
                   onPressed: () {
                     addPerson(context);

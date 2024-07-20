@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:credit_monitor/pages/add_credit.dart';
 import 'package:credit_monitor/services/firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PersonPage extends StatefulWidget {
   const PersonPage({super.key, required this.docID, required this.data});
@@ -15,11 +16,13 @@ class PersonPage extends StatefulWidget {
 
 class _PersonPageState extends State<PersonPage> {
   final Firestore firestoreService = Firestore();
-  
 
-  void openNoteBox(String person_id, String credit_id, double amount, String items) {
+  List<bool> _expanded = [];
+
+  void openNoteBox(
+      String person_id, String credit_id, double amount, String items) {
     final _amountcontroller = TextEditingController(text: amount.toString());
-  final _itemcontroller = TextEditingController(text: items);
+    final _itemcontroller = TextEditingController(text: items);
     showDialog(
       context: context,
       builder: (context) {
@@ -35,7 +38,9 @@ class _PersonPageState extends State<PersonPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20,),
+                SizedBox(
+                  height: 20,
+                ),
                 TextFormField(
                   controller: _amountcontroller,
                   keyboardType: TextInputType.number,
@@ -50,19 +55,21 @@ class _PersonPageState extends State<PersonPage> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                if(person_id==null){
+                if (person_id == null) {
                   // fireStoreService.addCredit({"name": _textcontroller.text});
-                }else{
+                } else {
                   // firestoreService.updateCredit(docID, {"name": _textcontroller.text});
                 }
 
-                print("text  ${_amountcontroller.text} ${_itemcontroller.text}");
+                print(
+                    "text  ${_amountcontroller.text} ${_itemcontroller.text}");
                 final _amount = double.tryParse(_amountcontroller.text);
                 Map credit_data = {
                   "amount": _amount,
                   "items": _itemcontroller.text
                 };
-                firestoreService.updateCredit(person_id, credit_id, credit_data);
+                firestoreService.updateCredit(
+                    person_id, credit_id, credit_data);
 
                 _amountcontroller.clear();
                 _itemcontroller.clear();
@@ -122,26 +129,32 @@ class _PersonPageState extends State<PersonPage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      child: Center(
-                          child: Text(
-                        "$total_credit",
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold
-                        ),
-                      )),
                       width: 200.0,
                       height: 200.0,
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
                           shape: BoxShape.circle,
+                          color: Colors.white,
+                          // borderRadius: BorderRadius.all(Radius.circular(10)),
                           boxShadow: [
                             BoxShadow(
-                                color: Color.fromARGB(255, 194, 223, 180)
-                                    .withOpacity(0.7),
-                                blurRadius: 2.0,
-                                offset: Offset(2.0, 2.0))
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 8,
+                              offset: const Offset(0, 1), // changes position of shadow
+                            ),
                           ]),
+                      child: Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.currency_rupee),
+                          Text(
+                            "$total_credit",
+                            style: const TextStyle(
+                                fontSize: 30, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      )),
                     ),
                   ),
                   Expanded(
@@ -160,31 +173,97 @@ class _PersonPageState extends State<PersonPage> {
                         } else {
                           List<QueryDocumentSnapshot> creditDocs =
                               creditSnapshot.data!.docs;
+                          _expanded = List.generate(creditDocs.length, (index)=>false);
                           return ListView.builder(
                             itemCount: creditDocs.length,
                             itemBuilder: (context, index) {
                               var creditData = creditDocs[index].data()
                                   as Map<String, dynamic>;
-                              return ListTile(
-                                title: Text(creditData["amount"].toString()),
-                                subtitle: creditData.containsKey("items")?Text(creditData["items"]):Text(''),
-                                trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                              var date = creditData["timestamp"].toDate();
+                              print(creditData);
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(10)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          spreadRadius: 1,
+                                          blurRadius: 8,
+                                          offset: Offset(0,
+                                              1), // changes position of shadow
+                                        ),
+                                      ]),
+                                  child: Column(
                                     children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit),
-                                        onPressed: () => {
-                                          openNoteBox(widget.docID, creditDocs[index].id, creditData["amount"], creditData["items"])
-                                        },
+                                      ListTile(
+                                        title: Text(
+                                          "${DateFormat("dd-MM-yy").format(date)}, ${DateFormat("EEEE").format(date)}",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        subtitle: Padding(
+                                          padding: const EdgeInsets.only(top: 6.0),
+                                          child: Row(children: [
+                                            Icon(
+                                              Icons.currency_rupee,
+                                              size: 16,
+                                            ),
+                                            Text(
+                                              creditData["amount"].toString(),
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ]),
+                                        ),
+                                        trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit,
+                                                  size: 24,
+                                                ),
+                                                onPressed: () => {
+                                                  openNoteBox(
+                                                      widget.docID,
+                                                      creditDocs[index].id,
+                                                      creditData["amount"],
+                                                      creditData["items"])
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.delete,
+                                                  size: 24,
+                                                ),
+                                                onPressed: () {
+                                                  print(
+                                                      "creditData ${creditDocs[index].id}");
+                                                  firestoreService.deleteCredit(
+                                                      widget.docID,
+                                                      creditDocs[index].id);
+                                                },
+                                              ),
+                                              creditData.containsKey("items")?
+                                              Icon(
+                                                  _expanded[index]==true? Icons.add: Icons.expand_more
+                                              ): Text('')
+                                            ]),
+                                            onTap: () {
+                                              setState(() {
+                                                _expanded[index] = _expanded[index]==true?false:true;
+                                                print("expanded $_expanded");
+                                              });
+                                            },
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete),
-                                        onPressed: (){
-                                          print("creditData ${creditDocs[index].id}");
-                                          firestoreService.deleteCredit(widget.docID, creditDocs[index].id);
-                                        },
-                                      ),
-                                    ]),
+                                      _expanded[index]? Container(
+                                        child: Text(creditData["items"]),
+                                      ): Text('')
+                                    ],
+                                  ),
+                                ),
                               );
                             },
                           );
