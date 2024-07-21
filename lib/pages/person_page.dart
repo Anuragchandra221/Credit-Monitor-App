@@ -17,7 +17,7 @@ class PersonPage extends StatefulWidget {
 class _PersonPageState extends State<PersonPage> {
   final Firestore firestoreService = Firestore();
 
-  List<bool> _expanded = [];
+  List<bool> _expanded = List.generate(50, (index) => false);
 
   void openNoteBox(
       String person_id, String credit_id, double amount, String items) {
@@ -140,12 +140,13 @@ class _PersonPageState extends State<PersonPage> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 1,
                               blurRadius: 8,
-                              offset: const Offset(0, 1), // changes position of shadow
+                              offset: const Offset(
+                                  0, 1), // changes position of shadow
                             ),
                           ]),
                       child: Center(
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(Icons.currency_rupee),
                           Text(
@@ -173,14 +174,14 @@ class _PersonPageState extends State<PersonPage> {
                         } else {
                           List<QueryDocumentSnapshot> creditDocs =
                               creditSnapshot.data!.docs;
-                          _expanded = List.generate(creditDocs.length, (index)=>false);
+
                           return ListView.builder(
                             itemCount: creditDocs.length,
                             itemBuilder: (context, index) {
                               var creditData = creditDocs[index].data()
                                   as Map<String, dynamic>;
                               var date = creditData["timestamp"].toDate();
-                              print(creditData);
+                              // print(creditData);
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Container(
@@ -199,68 +200,131 @@ class _PersonPageState extends State<PersonPage> {
                                       ]),
                                   child: Column(
                                     children: [
-                                      ListTile(
-                                        title: Text(
-                                          "${DateFormat("dd-MM-yy").format(date)}, ${DateFormat("EEEE").format(date)}",
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        subtitle: Padding(
-                                          padding: const EdgeInsets.only(top: 6.0),
-                                          child: Row(children: [
-                                            Icon(
-                                              Icons.currency_rupee,
-                                              size: 16,
-                                            ),
-                                            Text(
-                                              creditData["amount"].toString(),
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                          ]),
-                                        ),
-                                        trailing: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.edit,
-                                                  size: 24,
-                                                ),
-                                                onPressed: () => {
-                                                  openNoteBox(
-                                                      widget.docID,
-                                                      creditDocs[index].id,
-                                                      creditData["amount"],
-                                                      creditData["items"])
-                                                },
+                                      creditData.containsKey("items")
+                                          ? ExpansionTile(
+                                              title: Text(
+                                                "${DateFormat("dd-MM-yy").format(date)}, ${DateFormat("EEEE").format(date)}",
+                                                style: TextStyle(fontSize: 16),
                                               ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  size: 24,
-                                                ),
-                                                onPressed: () {
-                                                  print(
-                                                      "creditData ${creditDocs[index].id}");
-                                                  firestoreService.deleteCredit(
-                                                      widget.docID,
-                                                      creditDocs[index].id);
-                                                },
+                                              subtitle: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 6.0),
+                                                child: Row(children: [
+                                                  Icon(
+                                                    Icons.currency_rupee,
+                                                    size: 16,
+                                                  ),
+                                                  Text(
+                                                    creditData["amount"]
+                                                        .toString(),
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                  ),
+                                                ]),
                                               ),
-                                              creditData.containsKey("items")?
-                                              Icon(
-                                                  _expanded[index]==true? Icons.add: Icons.expand_more
-                                              ): Text('')
-                                            ]),
-                                            onTap: () {
-                                              setState(() {
-                                                _expanded[index] = _expanded[index]==true?false:true;
-                                                print("expanded $_expanded");
-                                              });
-                                            },
-                                      ),
-                                      _expanded[index]? Container(
-                                        child: Text(creditData["items"]),
-                                      ): Text('')
+                                              children: [
+                                                ListTile(
+                                              title: Text(
+                                                creditData["items"],
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              trailing: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      icon: const Icon(
+                                                        Icons.edit,
+                                                        size: 24,
+                                                      ),
+                                                      onPressed: () => {
+                                                        openNoteBox(
+                                                            widget.docID,
+                                                            creditDocs[index]
+                                                                .id,
+                                                            creditData[
+                                                                "amount"],
+                                                            creditData["items"])
+                                                      },
+                                                    ),
+                                                    IconButton(
+                                                      icon: const Icon(
+                                                        Icons.delete,
+                                                        size: 24,
+                                                      ),
+                                                      onPressed: () {
+                                                        print(
+                                                            "creditData ${creditDocs[index].id}");
+                                                        firestoreService
+                                                            .deleteCredit(
+                                                                widget.docID,
+                                                                creditDocs[
+                                                                        index]
+                                                                    .id);
+                                                      },
+                                                    ),
+                                                  ]),
+                                            ),
+                                              ],
+                                            )
+                                          : ListTile(
+                                              title: Text(
+                                                "${DateFormat("dd-MM-yy").format(date)}, ${DateFormat("EEEE").format(date)}",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              subtitle: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 6.0),
+                                                child: Row(children: [
+                                                  Icon(
+                                                    Icons.currency_rupee,
+                                                    size: 16,
+                                                  ),
+                                                  Text(
+                                                    creditData["amount"]
+                                                        .toString(),
+                                                    style:
+                                                        TextStyle(fontSize: 14),
+                                                  ),
+                                                ]),
+                                              ),
+                                              trailing: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      icon: const Icon(
+                                                        Icons.edit,
+                                                        size: 24,
+                                                      ),
+                                                      onPressed: () => {
+                                                        openNoteBox(
+                                                            widget.docID,
+                                                            creditDocs[index]
+                                                                .id,
+                                                            creditData[
+                                                                "amount"],
+                                                            creditData["items"])
+                                                      },
+                                                    ),
+                                                    IconButton(
+                                                      icon: const Icon(
+                                                        Icons.delete,
+                                                        size: 24,
+                                                      ),
+                                                      onPressed: () {
+                                                        print(
+                                                            "creditData ${creditDocs[index].id}");
+                                                        firestoreService
+                                                            .deleteCredit(
+                                                                widget.docID,
+                                                                creditDocs[
+                                                                        index]
+                                                                    .id);
+                                                      },
+                                                    ),
+                                                  ]),
+                                            ),
                                     ],
                                   ),
                                 ),
